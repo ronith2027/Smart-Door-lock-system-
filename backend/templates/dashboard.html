@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Door Access Dashboard</title>
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1d; /* Dark background */
+            color: #f0f0f5; /* Light default text */
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Header Styling (Adjust as needed) */
+        .header {
+            background-color: #25282c; /* Darker header */
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .header .user-info {
+            font-size: 0.9em;
+        }
+        .header .logout {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: bold;
+            background-color: #4a4e54;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .header .logout:hover {
+            background-color: #60646a;
+        }
+
+        /* Widget Grid Layout */
+        .widget-grid {
+            display: grid;
+            /* Adjust columns based on screen size if needed via media queries */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 25px; /* Space between widgets */
+        }
+
+        /* Individual Widget Styling */
+        .widget {
+            background-color: #2b2d31; /* Widget background */
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column; /* Stack title, content, link */
+            transition: transform 0.2s ease-in-out;
+        }
+        .widget:hover {
+            transform: translateY(-3px); /* Subtle hover effect */
+        }
+
+        .widget-title {
+            font-size: 1.1em;
+            color: #a0a0a5; /* Subdued title color */
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .widget-title i { /* Icon styling */
+             color: #4a90e2; /* Example icon color */
+             font-size: 1.2em;
+        }
+
+        .widget-content {
+            flex-grow: 1; /* Allow content to fill space */
+            margin-bottom: 15px; /* Space before link */
+            /* Styles for specific content types go here */
+        }
+
+        .widget-link {
+            display: inline-block; /* Or block if it takes full width */
+            margin-top: auto; /* Push link to bottom if widget height varies */
+            padding: 8px 12px;
+            background-color: #3a3f44;
+            color: #c0c0c5;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        .widget-link:hover {
+            background-color: #4a4e54;
+        }
+
+        /* Specific Widget Content Examples (Static Placeholders) */
+        .widget .info-list {
+            list-style: none;
+            font-size: 0.95em;
+        }
+        .widget .info-list li {
+            margin-bottom: 8px;
+            color: #d0d0d5;
+        }
+        .widget .info-list strong {
+            color: #a0a0a5;
+            margin-right: 5px;
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        .widget .gauge-placeholder, .widget .battery-placeholder, .widget .chart-placeholder {
+            background-color: #3a3f44; /* Placeholder background */
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            color: #70757a;
+            font-style: italic;
+            text-align: center;
+        }
+         .widget .gauge-placeholder span, .widget .battery-placeholder span {
+            font-size: 2.5em;
+            color: #f0f0f5;
+            font-weight: bold;
+         }
+
+        /* Add these styles inside the existing <style> block */
+
+.widget-content.owner-links {
+    display: flex;
+    flex-direction: column; /* Stack links vertically */
+    gap: 15px; /* Space between owner links */
+    align-items: stretch; /* Make links take full width */
+}
+
+.owner-link-button {
+    display: flex; /* Align icon and text */
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background-color: #3a3f44;
+    color: #c0c0c5;
+    text-decoration: none;
+    border-radius: 6px;
+    text-align: left; /* Align text to the left */
+    font-size: 0.95em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.owner-link-button i {
+    color: #6c757d; /* Subdued icon color */
+    font-size: 1.1em;
+    width: 20px; /* Fixed width for alignment */
+    text-align: center;
+}
+
+.owner-link-button:hover {
+    background-color: #4a4e54;
+    color: #ffffff;
+}
+.owner-link-button:hover i {
+    color: #4a90e2; /* Highlight icon on hover */
+}
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-door-open"></i> Door Access Dashboard</h1>
+        <div class="user-info">
+            User: <strong>{{ username }}</strong>
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="widget-grid">
+
+        <!-- Widget 1: Owner Details -->
+<div class="widget">
+    <h4 class="widget-title"><i class="fas fa-users-cog"></i> Owner Details</h4>
+    <div class="widget-content owner-links">
+        <!-- Links to individual owner detail pages -->
+        <a href="{{ url_for('owner_detail', owner_id='owner1') }}" class="owner-link-button">
+            <i class="fas fa-user-circle"></i> View Owner 1 Details
+        </a>
+        <a href="{{ url_for('owner_detail', owner_id='owner2') }}" class="owner-link-button">
+            <i class="fas fa-user-circle"></i> View Owner 2 Details
+        </a>
+        <a href="{{ url_for('owner_detail', owner_id='owner3') }}" class="owner-link-button">
+            <i class="fas fa-user-circle"></i> View Owner 3 Details
+        </a>
+    </div>
+    <!-- No separate overall 'view details' link needed here -->
+</div>
+
+        <!-- Widget 2: Access Log Graph -->
+        <!-- Widget 2: Owner Confidence Logs -->
+<div class="widget">
+    <h4 class="widget-title"><i class="fas fa-fingerprint"></i> Owner Confidence Logs</h4>
+    <div class="widget-content chart-placeholder">
+        [Simulated Fingerprint Confidence Logs]
+    </div>
+    <!-- Change this link -->
+    <a href="{{ url_for('owner_log_select') }}" class="widget-link">Select Owner to View Logs</a>
+</div>
+
+        <!-- Widget 3: Telegram History -->
+        <div class="widget">
+             <h4 class="widget-title"><i class="fab fa-telegram-plane"></i> Telegram Bot History</h4>
+            <div class="widget-content info-list">
+                <li>View recent interactions with the Telegram bot.</li>
+                <!-- Could add a snippet of the last message here if passed from Flask -->
+            </div>
+             <a href="{{ url_for('telegram_history') }}" class="widget-link">View Full History</a>
+        </div>
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controller Chat</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --header-bg: #075e54;
+      --header-text: white;
+      --body-bg: #d0e6dc;
+      --chat-bg: #e5ddd5;
+      --user-bubble-bg: #dcf8c6;
+      --bot-bubble-bg: #ffffff;
+      --input-bg: #f0f0f0;
+      --button-color: #128c7e;
+      --button-hover: #0f6a5f;
+      --send-button: #25d366;
+      --send-button-hover: #1ebe5a;
+      --border-color: #ccc;
+      --text-dark: #333;
+      --text-light: #666;
+    }
+
+    html, body {
+        height: 100%; /* Ensure body can be a reference for vh */
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--body-bg);
+      display: flex; /* Use flex to center container */
+      justify-content: center;
+      align-items: center;
+      /* min-height: 100vh; */ /* Using height 100% on html,body */
+      padding: 10px; /* Padding around the container */
+      box-sizing: border-box;
+    }
+
+    .chat-container {
+      display: flex; /* ***** IMPORTANT ***** */
+      flex-direction: column; /* ***** IMPORTANT: Stack items vertically ***** */
+      width: 100%;
+      max-width: 700px;
+      height: 85vh; /* Adjust as needed */
+      max-height: 800px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden; /* Clip content, scrolling happens inside chat-box */
+      background-color: var(--chat-bg);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .chat-header {
+      background-color: var(--header-bg);
+      color: var(--header-text);
+      padding: 12px 20px;
+      font-size: 18px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      flex-shrink: 0; /* ***** IMPORTANT: Prevent header shrinking ***** */
+    }
+
+    .chat-header span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-button {
+        color: var(--header-text);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        background-color: var(--button-color);
+        padding: 7px 14px;
+        border-radius: 16px;
+        transition: background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .back-button:hover { background-color: var(--button-hover); }
+    .back-button i { font-size: 12px; }
+
+    /* --- Flash Messages Styling --- */
+    .flash-messages {
+        padding: 0 15px 10px 15px; /* Padding added */
+        list-style: none;
+        /* Removed margin-bottom, use padding */
+        flex-shrink: 0; /* Prevent flash messages area from shrinking */
+        max-height: 100px; /* Limit height if too many messages */
+        overflow-y: auto; /* Allow scrolling if needed */
+        background-color: var(--chat-bg); /* Match chat background */
+        border-bottom: 1px solid var(--border-color); /* Separator */
+    }
+    .flash-messages li {
+        padding: 8px 12px; /* Adjusted padding */
+        margin-top: 5px; /* Use margin-top instead of margin-bottom */
+        border-radius: 4px;
+        font-size: 14px;
+        border: 1px solid transparent; /* Base border */
+    }
+    .flash-messages .danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .flash-messages .warning { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+    .flash-messages .info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+    .flash-messages .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    /* --- End Flash Messages --- */
+
+
+    .chat-box {
+      flex: 1; /* ***** IMPORTANT: Make chat box fill available space ***** */
+      padding: 20px;
+      overflow-y: auto; /* ***** IMPORTANT: Enable scrolling for messages ***** */
+      display: flex;
+      flex-direction: column; /* Stack messages top-down */
+      gap: 12px;
+      /* background-color: var(--chat-bg); Inherited */
+    }
+
+    /* Scrollbar styling (optional) */
+    .chat-box::-webkit-scrollbar { width: 6px; }
+    .chat-box::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 3px; }
+    .chat-box::-webkit-scrollbar-track { background: transparent; }
+
+
+    .message {
+      max-width: 75%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      position: relative;
+      word-wrap: break-word;
+      line-height: 1.45;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+      font-size: 14.5px;
+      color: var(--text-dark);
+    }
+    .bot { align-self: flex-start; background-color: var(--bot-bubble-bg); border-top-left-radius: 0; }
+    .user { align-self: flex-end; background-color: var(--user-bubble-bg); border-top-right-radius: 0; }
+
+    .message img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+      margin-top: 5px;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .message .timestamp {
+        display: block;
+        font-size: 11px;
+        color: var(--text-light);
+        margin-top: 4px;
+        text-align: right;
+    }
+    /* Example inactive style for user timestamp checkmark */
+    /*
+    .user .timestamp {
+        content: " \f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+    }
+    */
+
+    .chat-input {
+      display: flex;
+      padding: 10px 15px;
+      background-color: var(--input-bg);
+      border-top: 1px solid var(--border-color);
+      align-items: center;
+      flex-shrink: 0; /* ***** IMPORTANT: Prevent input area shrinking ***** */
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      outline: none;
+      font-size: 15px;
+      margin-right: 10px;
+      background-color: #fff;
+    }
+
+    .chat-input button {
+      padding: 0;
+      background-color: var(--send-button);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.2s ease;
+      flex-shrink: 0;
+    }
+    .chat-input button:hover { background-color: var(--send-button-hover); }
+
+  </style>
+</head>
+<body>
+
+  <div class="chat-container"> <!-- Flex container: column -->
+
+    <div class="chat-header"> <!-- Item 1 -->
+      <span><i class="fas fa-shield-alt"></i> Controller Chat</span>
+      <a href="{{ url_for('dashboard') }}" class="back-button">
+          <i class="fas fa-arrow-left"></i> Back
+      </a>
+    </div>
+
+    <!-- Flash Messages Display Area --> <!-- Item 2 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-messages">
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <div class="chat-box" id="chat-box"> <!-- Item 3: Should expand (flex: 1) -->
+      <!-- Messages are rendered here by Jinja -->
+      {% if messages %}
+          {% for msg in messages %}
+            <div class="message {{ msg.sender }}">
+              {% if msg.type == 'text' %}
+                {{ msg.content }}
+              {% elif msg.type == 'image' %}
+                <img src="{{ url_for('static', filename=msg.content) }}" alt="Image from {{ msg.sender }}">
+              {% else %}
+                 [Unsupported message type: {{ msg.type }}]
+              {% endif %}
+              <span class="timestamp">
+                  {{ msg.timestamp.split('T')[0] }} {{ msg.timestamp.split('T')[1].split('.')[0][:5] }}
+              </span>
+            </div>
+          {% endfor %}
+      {% else %}
+          <!-- This message only shows if the 'messages' list from Flask is empty -->
+          <div class="message bot" style="align-self: center; max-width: 80%; text-align: center; background-color: #f0f0f0;">
+              No messages yet. Start the conversation!
+          </div>
+      {% endif %}
+      <!-- End of message rendering -->
+    </div>
+
+    <form class="chat-input" method="POST" action="{{ url_for('controller_send') }}"> <!-- Item 4 -->
+      <input type="text" name="user_message" placeholder="Type your message..." required autocomplete="off" />
+      <button type="submit" aria-label="Send Message"><i class="fas fa-paper-plane"></i></button>
+    </form>
+
+  </div> <!-- End chat-container -->
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    function scrollToBottom() {
+        // Scroll the chatBox container to its maximum scroll height
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    // Run scroll to bottom after the page fully loads
+    window.addEventListener('load', scrollToBottom);
+
+    // Optional: If dynamically adding messages with JS in the future,
+    // you would call scrollToBottom() after adding a new message element.
+  </script>
+
+</body>
+</html>

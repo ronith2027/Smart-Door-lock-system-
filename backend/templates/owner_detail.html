@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamically set title based on owner -->
+    <title>Owner Details - {{ owner.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        /* Basic Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1d; /* Dark background */
+            color: #f0f0f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Header Styling (Similar to dashboard) */
+        .header {
+            background-color: #25282c; color: white; padding: 15px 20px;
+            margin-bottom: 30px; border-radius: 8px; display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .header h1 { font-size: 1.4em; margin: 0; display: flex; align-items: center; gap: 10px;}
+        .header .user-info { font-size: 0.9em; }
+        .header .back-button { /* Renamed from logout for clarity */
+            color: #e0e0e0; text-decoration: none; font-weight: bold;
+            background-color: #4a4e54; padding: 8px 15px; border-radius: 5px;
+            transition: background-color 0.3s ease; display: flex; align-items: center; gap: 5px;
+        }
+        .header .back-button:hover { background-color: #60646a; }
+
+        /* Owner Detail Card */
+        .owner-card-container {
+            display: flex;
+            justify-content: center; /* Center the card on the page */
+        }
+
+        .owner-card {
+            background-color: #2b2d31; /* Card background */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            display: flex; /* Use flex for side-by-side layout */
+            gap: 30px; /* Space between photo and info */
+            width: 100%;
+            max-width: 700px; /* Max width for the card */
+            align-items: flex-start; /* Align items to top */
+        }
+
+        .owner-photo {
+            flex-shrink: 0; /* Prevent photo from shrinking */
+            width: 150px; /* Fixed photo width */
+            height: 150px; /* Fixed photo height */
+            border-radius: 50%; /* Make it circular */
+            overflow: hidden; /* Clip image to circle */
+            border: 3px solid #4a4e54;
+        }
+        .owner-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the area, cropping if needed */
+        }
+
+        .owner-info {
+            flex-grow: 1; /* Allow info section to take remaining space */
+        }
+
+        .owner-info h2 {
+            font-size: 1.8em;
+            color: #e5e5ea;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #4a4e54;
+            padding-bottom: 10px;
+        }
+
+        .owner-info ul {
+            list-style: none;
+            padding: 0;
+        }
+        .owner-info li {
+            margin-bottom: 12px;
+            font-size: 1em;
+            color: #c0c0c5;
+        }
+        .owner-info li strong {
+            color: #8a8f94; /* Slightly different color for labels */
+            min-width: 120px; /* Ensure alignment */
+            display: inline-block; /* Allow min-width */
+            margin-right: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+         <!-- Dynamically set header title -->
+        <h1><i class="fas fa-id-card"></i> Owner: {{ owner.name }}</h1>
+        <div class="user-info">
+            <!-- Back button to return to the dashboard -->
+            <a href="{{ url_for('dashboard') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="owner-card-container">
+        <div class="owner-card">
+            <div class="owner-photo">
+                <!-- Display owner photo - ensure owner.photo has correct filename -->
+                <img src="{{ url_for('static', filename=owner.photo) }}" alt="Photo of {{ owner.name }}">
+            </div>
+            <div class="owner-info">
+                <h2>Details</h2>
+                <ul>
+                    <!-- Loop through the owner's details dictionary -->
+                    {% for key, value in owner.details.items() %}
+                        <li><strong>{{ key }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
