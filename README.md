@@ -1,4 +1,4 @@
-# Travel Story App
+# Smart Door lock system
 
 A web application using Flast Api and react framework
 
